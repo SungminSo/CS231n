@@ -125,6 +125,61 @@ Biologist started studying the mechanism of vision. One of the most influential 
 
 
 
-the performance on detecting objects the 20 object in 
+growth of the internet, the digital cameras were having better and better data to study compute vision.
 
-It is very likely to overfit in the training
+One of the outcomes is the field of computer vision has defined a very import building block problem to solve which is object recognition.
+
+
+
+in the early 2000s we began to have benchmark data set that can enable us to measure the progress of object recognition.
+
+One of the most influential benchmark data set is called PASCAL Visual Object Challenge, and it's a data set composed of 20 object classes. 
+
+
+
+from Prinston to Stanford ask: Are we ready to recognize every object or most of the object in the world.
+
+- most ot the machine learning algorithms very likely to overfit in the training process
+- part of the problem is visual data is very complex
+  - because it's complex, our models tend to have a high dimension of input and have to have a lot of parameters to fit and when we don't have enough training data overfitting happens very fast and the we cannot generalize very well.
+
+motivated by dual reason.
+
+- one is just want to recognize the world of all the objects
+- the other one is to overcome the machine learning bottleneck of overfitting
+
+this project called ImageNet.
+
+the end result is a ImageNet of almost 15 million or 40 million plus images organized in 22000 categories of objects and scenes.
+
+
+
+![image-20200319224607731](/Users/paul/Library/Application Support/typora-user-images/image-20200319224607731.png)
+
+ one particular moment should notice on this graph is the year 2012.
+
+- in the first two years, error rate hovered around 25%
+- but in 2012 the error rate was dropped more almost 10% to 16
+- winning algorithm of that year is a convolutional neural network model.
+
+
+
+ImageNet Large Scale Visual Recognition Challenge
+
+- year 2010: NEC-UIUC (CVPR 2011)
+- year 2012: SuperVision(==AlexNet)  (NIPS 2012)
+- year 2014: GoogleNet, VGG (arrive 2014)
+- year 2015: MSRA(==Residual Networks)
+
+
+
+one of the sorf of foundational works in this area of convolutional neural networks was actually in the '90s from Jan LeCun and collaborators
+
+there's a couple really key innovations that happened that have changed since the '90s.
+
+- computation
+  - 10^6 -> 10^9 transistor
+  - GPU
+- data
+  - in the '90s there just wasn't that much labeled data available.
+
