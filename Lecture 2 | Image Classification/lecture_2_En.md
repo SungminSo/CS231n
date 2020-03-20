@@ -92,9 +92,9 @@ def predict(model, test_images):
 
 #### L1 distance(== Manhattan distance)
 
-- ![image-20200320223808977](/Users/paul/Library/Application Support/typora-user-images/image-20200320223808977.png)
+- <img src="/Users/paul/Library/Application Support/typora-user-images/image-20200320223808977.png" alt="image-20200320223808977" style="zoom:50%;" />
 
-- ![image-20200320231227914](/Users/paul/Library/Application Support/typora-user-images/image-20200320231227914.png)
+- <img src="/Users/paul/Library/Application Support/typora-user-images/image-20200320231227914.png" alt="image-20200320231227914" style="zoom:50%;" />
 
 - ![image-20200320223949285](/Users/paul/Library/Application Support/typora-user-images/image-20200320223949285.png)
 
@@ -163,8 +163,8 @@ A: the white regions are where there was no majority among the k-nearest neighbo
 
 #### L2 distance(== Euclidean distance)
 
-- ![image-20200320231130814](/Users/paul/Library/Application Support/typora-user-images/image-20200320231130814.png)
-- ![image-20200320231206353](/Users/paul/Library/Application Support/typora-user-images/image-20200320231206353.png)
+- <img src="/Users/paul/Library/Application Support/typora-user-images/image-20200320231130814.png" alt="image-20200320231130814" style="zoom:50%;" />
+- <img src="/Users/paul/Library/Application Support/typora-user-images/image-20200320231206353.png" alt="image-20200320231206353" style="zoom:50%;" />
 - L1 distance depends on your choice of coordinates system. So if you were to rotate the coordinate frame that would actually change the L1 distance between the points.
 - Whereas changing the coordinate frame in the L2 distance doesn't matter. it's the same thing no matter what your coordinate frame is.
 - So maybe if your input features, if the individual entries in your vector have some important meaning for your task, then maybe somehow L1 might be a more natural fit.
@@ -221,4 +221,67 @@ A: where your algorithm is able to see the labels of the training set, but for t
 
 
 
-Q: Whether the test set, is it possible that the test set might not be representative of data our there in the wild?
+Q: Whether the test set, is it possible that the test set might not be representative of data out there in the wild?
+
+A: this definitely can be a problem in practice, the underlying statistical assumption here is that your data are all independenty and identically distributed, so that all of your data points should be drawn from the same underlying probability distribution. 
+
+when i'm creating datasets, for example, one thing i do, is go and collect a whole bunch of data all at once, using the exact same methodology for collecting the data, and then afterwards you go and partition it randomly between train and test.
+
+one thing that can screw you up here is maybe if you're collecting data over time and you make the earlier data, that you collect first, be the training data, and the later data that you collect be the test data, then you actually might run into this shift that could cause problems. but as long as this partition is random among your entire set of data points, then that's how we try to alleviate this problem in practice.
+
+
+
+**K-Nearest Neighbor** on images never used.
+
+- very slow at test time.
+- Distance metrics on pixels are not informative
+
+![image-20200321010517139](/Users/paul/Library/Application Support/typora-user-images/image-20200321010517139.png)
+
+- L2 distance between the original and the boxed, the original and the shuffled, and original in the tinted, they all have the same value.
+- which is maybe not so good. because L2 distance is really not doing a very good job at capturing these perceptional distances between images.
+- curse of dimensionality
+
+
+
+Q: why do these images have the same L2 distance?
+
+A: bacause it is carefully constructed them to have the same L2 distance.
+
+
+
+Q: whether or not it's common in real-world, cases to go back and retrain the entire dataset once you've found those best hyperparameters?
+
+A: people sometimes do this in practice, but it's somewhat a matter of taste.
+
+
+
+### linear Classification
+
+one analogy people often talk about when working with neural networks is we think of them as being kind of like Lego blocks. that you can have different kinds of components of neural networks and you can stick these components togetehr to build these large different towers of convolutional networks.
+
+one of the most basic building blocks that we'll see in different types of deep learning applications is this linear classifier.
+
+
+
+the linear classifier is one of the simplest examples of what we call a parametric model.
+
+![image-20200321012849783](/Users/paul/Library/Application Support/typora-user-images/image-20200321012849783.png)
+
+- have two different component. x for our input data and also a set of parameters, or weights, which is usually called W, also somtimes theta.
+- f(x, W) = Wx
+  - f(x, W) = 10 x 1 size
+  - x = (32 x 32 x 3) x 1 = 3072 x 1
+  - => W = 10 x 3072
+- f(x, W) = Wx + b
+  - also sometimes, we'll often add a bias term which will be a constant vector of 10 elements that does not interact with the training data, and instead just gives us some sort of data independent preferences for some classes over another.
+- ![image-20200321013905492](/Users/paul/Library/Application Support/typora-user-images/image-20200321013905492.png)
+- ![image-20200321014251456](/Users/paul/Library/Application Support/typora-user-images/image-20200321014251456.png)
+- ![image-20200321014510587](/Users/paul/Library/Application Support/typora-user-images/image-20200321014510587.png)
+
+
+
+
+
+
+
