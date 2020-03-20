@@ -90,49 +90,51 @@ def predict(model, test_images):
 
 ### Distance Metric
 
-- L1 distance(== Manhattan distance)
+#### L1 distance(== Manhattan distance)
 
-  - ![image-20200320223808977](/Users/paul/Library/Application Support/typora-user-images/image-20200320223808977.png)
+- ![image-20200320223808977](/Users/paul/Library/Application Support/typora-user-images/image-20200320223808977.png)
 
-  - ![image-20200320223949285](/Users/paul/Library/Application Support/typora-user-images/image-20200320223949285.png)
+- ![image-20200320231227914](/Users/paul/Library/Application Support/typora-user-images/image-20200320231227914.png)
 
-  - just compare individual pixels on the images.
+- ![image-20200320223949285](/Users/paul/Library/Application Support/typora-user-images/image-20200320223949285.png)
 
-  - ```python
-    # Nearest Neighbor Classifier
-    import numpy as np
+- just compare individual pixels on the images.
+
+- ```python
+  # Nearest Neighbor Classifier
+  import numpy as np
+  
+  class NearestNeighbor:
+    def __init__(self):
+      pass
     
-    class NearestNeighbor:
-      def __init__(self):
-        pass
+    def train(self, X, y):
+      ''' 
+      X is N x D where each row is an example.
+      Y is 1-dimension of size N
+      '''
+      # the nearest neighbor classifier simply remembers all the training data
+      self.Xtr = X
+      self.ytr = y
       
-      def train(self, X, y):
-        ''' 
-        X is N x D where each row is an example.
-        Y is 1-dimension of size N
-        '''
-        # the nearest neighbor classifier simply remembers all the training data
-        self.Xtr = X
-        self.ytr = y
+    def predict(self, X):
+      '''
+      X is N x D where each row is an example we wish to predict label for
+      '''
+      num_test = X.shape[0]
+      # lets make sure that the output type matches the input type
+      Ypred = np.zeros(num_test, dtype = self.ytr.dtype)
+      
+      # loop over all test rows
+      for i in range(num_test):
+        # find the nearest training image t the i'th test image
+        # using the L1 distance (sum of absolute value differences)
+        distances = np.sum(np.abs(self.Xtr - X[i,:]), axis = 1)
+        min_index = np.argmin(distances) # get the index with smallest distance
+        Ypred[i] = self.ytr[min_index] # predict the label of the nearest example
         
-      def predict(self, X):
-        '''
-        X is N x D where each row is an example we wish to predict label for
-        '''
-        num_test = X.shape[0]
-        # lets make sure that the output type matches the input type
-        Ypred = np.zeros(num_test, dtype = self.ytr.dtype)
-        
-        # loop over all test rows
-        for i in range(num_test):
-          # find the nearest training image t the i'th test image
-          # using the L1 distance (sum of absolute value differences)
-          distances = np.sum(np.abs(self.Xtr - X[i,:]), axis = 1)
-          min_index = np.argmin(distances) # get the index with smallest distance
-          Ypred[i] = self.ytr[min_index] # predict the label of the nearest example
-          
-        return Ypred
-    ```
+      return Ypred
+  ```
 
 
 
@@ -144,11 +146,79 @@ A: train O(1), predict O(N)
 
 
 
+**K-Nearest Neighbors**
+
+![image-20200320230307797](/Users/paul/Library/Application Support/typora-user-images/image-20200320230307797.png)
+
+- find K or our nearest neighbors, according to our distance metric, and  then take a vote among each of neighbors.
+- predict a marofity vote among our neighbors.
 
 
 
+Q: What is the deal with these white regions?
+
+A: the white regions are where there was no majority among the k-nearest neighbors.
 
 
 
+#### L2 distance(== Euclidean distance)
+
+- ![image-20200320231130814](/Users/paul/Library/Application Support/typora-user-images/image-20200320231130814.png)
+- ![image-20200320231206353](/Users/paul/Library/Application Support/typora-user-images/image-20200320231206353.png)
+- L1 distance depends on your choice of coordinates system. So if you were to rotate the coordinate frame that would actually change the L1 distance between the points.
+- Whereas changing the coordinate frame in the L2 distance doesn't matter. it's the same thing no matter what your coordinate frame is.
+- So maybe if your input features, if the individual entries in your vector have some important meaning for your task, then maybe somehow L1 might be a more natural fit.
+- But if it's just a generic vector in some space and you don't know which of the differenct elements, what they actually mean, then maybe L2 is slightly more natural.
 
 
+
+K-Nearest Neighbors Demo: http://vision.stanford.edu/teaching/cs231n-demos/knn/
+
+
+
+### Hyperparameters
+
+choices about the algorithm that we set rather than learn
+
+- what is the best value of k to use?
+- what is the best distance to use?
+
+how do you set these things in practice?
+
+- very problem-dependent.
+- must try them all out and see what works best.
+
+
+
+Q: Where L1 distance might be preferable to using L2 distance?
+
+A: mainly problem-dependent. but i think when your individual elements actually have some meaning, is where i think maybe using L1 might make a little bit more sense. because L1 depends on the coordinate system. but the best answer is just to try them both and see what workds better.
+
+
+
+**Setting Hyperparameters**
+
+- Idea #1: Choose hyperparameters that work best on the training data
+  - this is actually a really terrible idea.
+  - for example, in K-Nearest neighbor, k = 1 always workd perfectly on training data.
+  - and ultimately in machine learning, we don't care aboute fitting the training data, we really care about how our classifier will perform on unseen data after training.
+- Idea #2: Split data into train and test, choose hyperparameters that work best on test data
+  - this seems like maybe a more reasonable strategy, but, in fact, this is also a terrible idea.
+  - the point of the test set is to give us some estimate of how our method will do on unseen data that's coming our from the wild. 
+  - our performance on this test set will no longer be representative of our performance of new, unseen data.
+- Idea #3: Split data into train, validation, and test. choose hyperparameters on validation and evaluate on test
+  - go train our algorithm with many differenct choices of hyperparameters on the traininig set, evaluate on the validation set, and now pick the set of hyperparameters which performs best on the validation set. and run it once on the test set.
+  - it's much better
+- Idea #4: Cross-Validation: Split data into folds, try each fold as validation and average the results
+  - Useful for small datasets, but not used too frequently in deep learning.
+  - when you do it this way, you get much higher confidence about which hyperparameters are going to perform more robustly. but in practice in deep learning, when we're training large models and training is very computationaly expensive, these doesn't get used too much in practice.
+
+
+
+Q: A little bit more concretely, what's the difference between the training and the validation set?
+
+A: where your algorithm is able to see the labels of the training set, but for the validation set, your algorithm doesnt' have direct access to the labels. we only use the labels of the validation set to check how well our algorithms are doing.
+
+
+
+Q: Whether the test set, is it possible that the test set might not be representative of data our there in the wild?
