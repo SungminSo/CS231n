@@ -76,7 +76,7 @@ Biologist started studying the mechanism of vision. One of the most influential 
 - first process is what he calls "primal sketch". This is where mostly the edges, the bars, the ends, the virtual lines, the curves, boundaries, are represented
 - the next step is what he calls "two-and-a-half d sketch". this is where we start to piece together the surfaces, the depth information, the layers, or the discontinuites of the visual scene.
 - And then eventually we put everything together and have a 3d model.
-- ![image-20200318000626697](/Users/paul/Library/Application Support/typora-user-images/image-20200318000626697.png)
+- <img src="./img/lecture_1_primal_sketch_desc.png" />
 
 
 
@@ -154,7 +154,7 @@ the end result is a ImageNet of almost 15 million or 40 million plus images orga
 
 
 
-![image-20200319224607731](/Users/paul/Library/Application Support/typora-user-images/image-20200319224607731.png)
+<img src="./img/lecture_1_imageNet_graph.png" />
 
  one particular moment should notice on this graph is the year 2012.
 

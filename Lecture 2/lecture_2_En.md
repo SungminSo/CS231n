@@ -92,11 +92,11 @@ def predict(model, test_images):
 
 #### L1 distance(== Manhattan distance)
 
-- <img src="/Users/paul/Library/Application Support/typora-user-images/image-20200320223808977.png" alt="image-20200320223808977" style="zoom:50%;" />
+- <img src="./img/L1_distance_numerical_expression.png" style="zoom:50%;" />
 
-- <img src="/Users/paul/Library/Application Support/typora-user-images/image-20200320231227914.png" alt="image-20200320231227914" style="zoom:50%;" />
+- <img src="./img/L1_distance_graph.png" style="zoom:50%;" />
 
-- ![image-20200320223949285](/Users/paul/Library/Application Support/typora-user-images/image-20200320223949285.png)
+- <img src="./img/L1_distance_calculation.png" />
 
 - just compare individual pixels on the images.
 
@@ -148,7 +148,7 @@ A: train O(1), predict O(N)
 
 **K-Nearest Neighbors**
 
-![image-20200320230307797](/Users/paul/Library/Application Support/typora-user-images/image-20200320230307797.png)
+<img src="./img/k-nearest-neighbors.png" />
 
 - find K or our nearest neighbors, according to our distance metric, and  then take a vote among each of neighbors.
 - predict a marofity vote among our neighbors.
@@ -163,8 +163,8 @@ A: the white regions are where there was no majority among the k-nearest neighbo
 
 #### L2 distance(== Euclidean distance)
 
-- <img src="/Users/paul/Library/Application Support/typora-user-images/image-20200320231130814.png" alt="image-20200320231130814" style="zoom:50%;" />
-- <img src="/Users/paul/Library/Application Support/typora-user-images/image-20200320231206353.png" alt="image-20200320231206353" style="zoom:50%;" />
+- <img src="./img/L2_distance_numerical_expresion.png" style="zoom:50%;" />
+- <img src="./img/L2_distance_graph.png" style="zoom:50%;" />
 - L1 distance depends on your choice of coordinates system. So if you were to rotate the coordinate frame that would actually change the L1 distance between the points.
 - Whereas changing the coordinate frame in the L2 distance doesn't matter. it's the same thing no matter what your coordinate frame is.
 - So maybe if your input features, if the individual entries in your vector have some important meaning for your task, then maybe somehow L1 might be a more natural fit.
@@ -236,7 +236,7 @@ one thing that can screw you up here is maybe if you're collecting data over tim
 - very slow at test time.
 - Distance metrics on pixels are not informative
 
-![image-20200321010517139](/Users/paul/Library/Application Support/typora-user-images/image-20200321010517139.png)
+<img src="./img/k-nearest-neighbors_example.png" />
 
 - L2 distance between the original and the boxed, the original and the shuffled, and original in the tinted, they all have the same value.
 - which is maybe not so good. because L2 distance is really not doing a very good job at capturing these perceptional distances between images.
@@ -266,7 +266,7 @@ one of the most basic building blocks that we'll see in different types of deep 
 
 the linear classifier is one of the simplest examples of what we call a parametric model.
 
-![image-20200321012849783](/Users/paul/Library/Application Support/typora-user-images/image-20200321012849783.png)
+<img src="./img/linear_classifier.png" />
 
 - have two different component. x for our input data and also a set of parameters, or weights, which is usually called W, also somtimes theta.
 - f(x, W) = Wx
@@ -275,9 +275,9 @@ the linear classifier is one of the simplest examples of what we call a parametr
   - => W = 10 x 3072
 - f(x, W) = Wx + b
   - also sometimes, we'll often add a bias term which will be a constant vector of 10 elements that does not interact with the training data, and instead just gives us some sort of data independent preferences for some classes over another.
-- ![image-20200321013905492](/Users/paul/Library/Application Support/typora-user-images/image-20200321013905492.png)
-- ![image-20200321014251456](/Users/paul/Library/Application Support/typora-user-images/image-20200321014251456.png)
-- ![image-20200321014510587](/Users/paul/Library/Application Support/typora-user-images/image-20200321014510587.png)
+- <img src="./img/linear_classifier_example.png" />
+- <img src="./img/linear_classifier_in_graph.png" />
+- <img src="./img/linear_classifier_hard_cases.png" />
 
 
 
