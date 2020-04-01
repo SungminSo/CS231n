@@ -70,7 +70,7 @@ if "car" is the correct class,
 
 ​			= max(0, -2.6) + max(0, -1.9)
 
-​			= 0 + 0 = 3
+​			= 0 + 0 = 0
 
 
 
@@ -94,3 +94,32 @@ A: It seems like kind of an arbitrary choice here, it's the only constant that a
 
 
 
+Q1: what's going to happen to the loss if we change the scores of the car image just a little bit? 
+
+A: if we jiggle the scores for this car image a little bit, the loss will not change. So the SVM loss, remember, the only thing it cares about is getting the correct score to be greater than one ore than the incorrect scores, but in this case, the car score is already quite a bit larger than the others, so if the scores for this class changed for this example changed just a little bit, this margin of one will still be retained and the loss wil not change.
+
+
+
+Q2: what's the min and max possible loss in SVM?
+
+A: min == 0, max == infinity.
+
+
+
+Q3: sort of when you initialize these things and start training from scratch, usually you kind of initialize W with some small random values, as a result your scores tend to be sort of small uniform random values at the beginning of training. if all of your Ss, if all of the scores are approximately zero and approximately equal, then what kind of loss do you expect when your're using multiclass SVM?
+
+A: number of classes minus one. Because remember that if we're looping over all of the incorrect classes, so we're looping over (C - 1) classes, within each of those classes the two Ss will be aboute the same, so we'll get a loss of one because of the margin and we'll get C - 1.
+
+if the loss you actually see at the start of training at that first iteration is not equal to C-1, that means you probably have a bug and you should go check your code. so this is actually kind of a useful thing to be checking in practice.
+
+
+
+Q4: what happens if the sum is also over the correct class if we just go over everything?(including j=y_i)
+
+A: the loss increases by one. 
+
+
+
+Q5: What if we used mean instead of sum?
+
+A: it doesn't change.
