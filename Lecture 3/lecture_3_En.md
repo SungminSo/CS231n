@@ -122,4 +122,76 @@ A: the loss increases by one.
 
 Q5: What if we used mean instead of sum?
 
-A: it doesn't change.
+A: it doesn't change. so the number of classes is going to be fixed ahead of time when we select our data set, so that's just rescaling the whole loss function by a constant, so it doesn't really matter.
+
+
+
+Q6: what if we change this loss formulation and we actually added a square term on top of this max?
+
+<img src="./img/q6_square_term_loss_function.png" style="zoom:50%;" />
+
+would this end up being the same problem or would this be a different classification algorithm?
+
+A: this would be different.this would end up actually computing a different loss function. this idea of a squared hinge loss actually does get used sometimes in practice, so that's kind of another trick to have in your bag when you're making up your own loss functions for your own problems.
+
+
+
+Q: why would you ever consider using a squared loss instead of a non-squared loss?
+
+A: the whole point of a loss function is to kind of quantify how bad are different mistakes. and if the classifier is making different sorts of mistakes, how do we weight off the different trade-offs between different types of mistakes the classifier mght make? so if you're using a squared loss, that sort of says that things that are very bad, are now going to be sqaured bad. whereas if you're using this hinge loss, we don't actually care between being a little bit wrong and being a lot wrong, this idea of using a linear versus a square is a way to quantify how much we care about differenct categories of errors. 
+
+
+
+Multi-class SVM loss - Example code
+
+```python
+def L_i_vectorized(x, y, W):
+	scores = W.dot(x)
+  margins = np.maximum(0, scores - scores[y] + 1)
+  margins[y] = 0
+  loss_i = np.sum(margins)
+  return loss_i
+```
+
+
+
+Q: Suppose that we found a W such that L = 0. is this W unique?
+
+A: No! 2W is also has L = 0!
+
+Ex) 
+
+W : max(0, 1.3 - 4.9 + 1) + max(0, 2.0 - 4.9 + 1)
+
+​	= max(0, -2.6) + max(0, -1.9)
+
+​	= 0 + 0 = 0
+
+2W : max(0, 2.6 - 9.8 + 1) + max(0, 4.0 - 9.8 + 1)
+
+​	= max(0, -6.2) + max(0, -4.8)
+
+​	= 0 + 0 = 0
+
+<img src="./img/regularization_term.png" />
+
+there's this whole idea of Occams' Razor, which is this fundamental idea in scientific discovery more broadly, which is that if you have many different competing hypotheses, that could explain your observations, you should generally prefer the simpler one, because that's the explanation that is more likely to generalize to new observations in the future.
+
+
+
+Q: What's the connection between this lambda, R, W term and actually forcing this wiggly line to become a straight green line?
+
+A: i didn't want to go through the derivation on this because i thought it would lead us too far astray, but you can imagine, maybe you're doing a regression problem, in terms of different polynomial basis functions, and if you're adding this regression penalty, maybe the model has access to polynomials of very high degree, but through this regression term you could encourage the model to prefer polynomials of lower degree, if they fit the data properly, or if they fit the data relatively well. either you can constrain your model class to just not contain the more powerful, more complez models, or you can add this soft penalty where the model still has access to more complex models, maybe high degree polynomials in this case, but you add this soft constraint, saying that if you want to use these more complex models, you need to overcome this penalty for using their complexity.
+
+
+
+<img src="./img/regularizations.png" />
+
+- the idea of L2 regularization is you're just penalizing the euclidean norm of this weight vector.
+- the L1 regularization has some nice properties like encouraging sparsity in this matrix W.
+
+
+
+Q: how does the L2 regularization measure the complexity of the model?
+
+A: so here we maybe have some training example, x, and there's two different Ws that we're considering. so x is just this vector of four ones, and we're considering these two difference possibilities, one is a single one and three zeros, and the other has this 0.25 spread across the four differenct entries. and now, when we're doing linear classification, we're really taking dot products between our x and our W. so in terms of linear classification, these two Ws are the same, because they give the same result when dot producted with x. if you look at these two examples, which one would L2 regression prefer? L2 regression would prefer W2. because it has a smaller norm.So L2 regularization is saying that it prefers to spread that influence across all the different values in x. and by the way, L1 regularization has this opposite interpretation. 
