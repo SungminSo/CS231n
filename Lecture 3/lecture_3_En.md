@@ -234,3 +234,132 @@ so then our loss will now be the negative log of the probability of the true cla
 
 <img src="./img/softmax_calculation_example.png" />
 
+
+
+Q1: what's the min and max value of the softmax loss?
+
+A: min=0, max=infinity. And the way that you can see this, the probability distribution that we want is one on the correct class, zero on the incorrect classes, the way that we do that is, so if that were the case, then this thing inside the log would end up being one, because it's the log probability of the true class, then log og one is zero, minus log of one is still zero. so that means that if we got the thing totally right, then our loss would be zero. 
+
+By the way, in order to get the thing totally right, what would our scores have to look like? So the scores would actually have to go quite extreme, like towards infinity. so because we actually have this exponentiation, this normalization, the only way we can actually get a probability distribution of one and zero, is actually putting an infinite score for the correct class, and minus infinity score for all the incorrect classes. and computers don't do so well with infinities, so in practice, you'll never get to zero loss on this thing with finite precision. But you still have this interpretation that zero is the theoretical minimum loss here. and the maximum loss is unbounded. so suppose that if we had zero probability mass on the correct class, then you would have minus log of zero, log of zero is minus infinity, so minus log of zero is plus infinity.so that's really bad.
+
+
+
+Q2: If all the Ss are small and about zero, then what is the loss here?
+
+A: minus log of one over c, becuase log can flip the thing so then it's just log of c. and again, this is a nice debugging thing, if you're training a model with this softmax loss, you should check at the first iteration. if it's not log C, then something's gone wrong.
+
+<img src="./img/compare_svm_softmax.png" />
+
+
+
+Q3: Suppose i take a datapoint and i jiggle a bit (changing its score slightly). what happens to the loss in both cases?
+
+A: remember if we go back to this example where in the multi-class SVM loss, when we had the car, and the car score was much better than all the incorrect classes, then jiggling the scores for that car image didn't change the multi-class SVM loss at all, because the only thing that the SVM loss cared about was getting that correct score to be greater than a margin above the incorrect scores. but now the softmax loss is actually quite different in this respect. the softmax loss actually always wants to drive that probability mass all the way to one. so even if you're giving very high score to the correct class, and very low score to all the incorrect classes, softmax will want you to pile more and more probability mass on the correct class, and continue to push the score of that correct class up towards infinity, and the score of the incorrect classes down towards minus infinity.
+
+
+
+### Optimization
+
+- how do we actually find this W that minimizes the loss?
+
+
+
+strategy #1: A first very bad ideq solution: Random Search
+
+```python
+# assume X_train is the data where each column is an example (e.g. 3073 x 50,000)
+# assume Y_train are the labels (e.g. 1D array of 50,000)
+# assume the function L evaluates the loss function
+
+bestloss = float("inf") # Python assigns the highest possible float value
+for num in range(10000):
+  W = np.random.randn(10, 3073) * 0.0001 # generate random parameters
+  loss = L(X_train, Y_train, W)
+  if loss < bestloss: # keep track of the best soluttion
+    bestloss = loss
+    bestW = W
+  print 'in attempt %d the loss was %f, best %f' % (num, loss, bestloss)
+```
+
+
+
+```python
+# See how well this works on the test set...
+# Assume X_test is [3073 x 10000], Y_test [10000 x 1]
+scores = Wbest.dot(Xte_cols) # 10 x 10000, the class scores for all test examples
+# find the index with max score in each column (the predicted class)
+Yte_predict = np.argmax(scores, axis = 0)
+# and calculate accuracy (fraction of predictions that are correct)
+np.mean(Yte_predict == Yte)
+# returns 0.1555
+```
+
+
+
+Strategy #2: Follow the slope
+
+- This it generally the strategy that we'll follow when training these large neural networks and linear classifiers and other things.
+- what is the slope?
+  - in 1-dimension, the derivative of a function
+  - in multiple dimensions, the gradient is the vertor of (partial derivatives) along each dimension
+  - the slope in any direction is the dot product of the directio with the gradient
+  - the direction of steepest descent is the negative gradient
+
+This is actually terrible idea, because it's super slow. so you might imagine that computing this function, f, might actually be super slow if it's a large, convolutional neural network.
+
+so in practice, you'll never want to compute your gradients for your finite differences, 'cause you'd have to wait for hundreds of millions potentially of function evaluations to get a single gradient, and that would be super slow and super bad.
+
+-> Use calculus to compute an **analytic gradient** 
+
+- it'll be exact
+- It'll be much faster since we just need to compute this single expression
+
+
+
+<img src="./img/optimization_summary.png" />
+
+
+
+however, numerical gradients are actually a very useful debuggin tool. a really common debuggin strategy for these things is to use the numeric gradient as a way as sort of unit test to make sure that your analytic gradient was correct. 
+
+
+
+### Gradient Descent
+
+```python
+# Vanilla Gradient Descent
+
+while True:
+  weights_grad = evaluate_gradient(loss_fun, data, weights)
+  weights += - step_size * weights_grad 
+  # perform parameter update in the opposite of the gradient direction
+  # step_size if a hyper-parameter
+```
+
+
+
+if we're using the image net data set for example, then N cloud be like 1.3 million, so actually computing this loss could be actually very expensive and require computing perhaps millions of evaluations of this function. and actually, because the gradient is a linear operator, when you actually try to compute the gradient of this expression, you see that the gradient of our loss is now the sum of the gradient of the losses for each of the individual terms. so if we want to compute the gradient, it sort of requires us to iterate over the entire training data set all N of these examples. so if our N was like a million, this would be super super slow.
+
+So in practice, we tend to use what is called stochastic gradient descent, where rather than computing the loss and gradient over the entire training set, instead at every iteration, we sample some small set of training examples, called a minibatch. Usually this is a power of two by convention, like 32, 64, 126 are common numbers, and then we'll use this small minibatch to compute an estimate of the full sum, and an estimate of the true gradient. 
+
+### Stochastic Gradient Descent (SGD)
+
+```python
+# Vanilla Minibatch Gradient Descent
+
+while True:
+  data_batch = sample_training_data(data, 256) # sample 256 examples
+  weights_grad = evaluate_gradient(loss_fun, data_batch, weights)
+  weights += - step_size * weights_grad # perform parameter update
+```
+
+
+
+### Aside: Image Features
+
+<img src="./img/image_features_motivation.png" />
+
+<img src="./img/image_features_color_histogram.png" />
+
+<img src="./img/image_features_HoG.png" />
+
