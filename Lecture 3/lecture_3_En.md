@@ -195,3 +195,42 @@ A: i didn't want to go through the derivation on this because i thought it would
 Q: how does the L2 regularization measure the complexity of the model?
 
 A: so here we maybe have some training example, x, and there's two different Ws that we're considering. so x is just this vector of four ones, and we're considering these two difference possibilities, one is a single one and three zeros, and the other has this 0.25 spread across the four differenct entries. and now, when we're doing linear classification, we're really taking dot products between our x and our W. so in terms of linear classification, these two Ws are the same, because they give the same result when dot producted with x. if you look at these two examples, which one would L2 regression prefer? L2 regression would prefer W2. because it has a smaller norm.So L2 regularization is saying that it prefers to spread that influence across all the different values in x. and by the way, L1 regularization has this opposite interpretation. 
+
+
+
+Q: So why would L1 prefer W1? don't they sum to the same one?
+
+A: yes, you're right. so in this case, L1 is actually the same between these two.but you could construct a similar example to this where W1 would be preferred by L1 regularization. i guess the general intuition behind L1 is that it generally prefers sparse solutions, that it drives all your entries of W to zero for most of the entries, except for a couple where it's allowed to deviate from zero. the way of measuring complexity for L1 is maybe the number of non-zero entries, and then for L2, it thinks that things that spread the W across all the values are less complex. so it depends on your data, depends on your problem.
+
+<img src="./img/L1_L2_example.png" />
+
+by the way, if you're a hardcore Bayesian, then using L2 regularization has this nice interpretation of MAP inference under a Gaussian prior on the parameter vector.
+
+
+
+Q: adding a regularization is not going to change the hypothesis calss? this is not going to change us away from a linear classifier? 
+
+A: maybe this example of this polynomial regression is definitely not linear regression. that could be seen as linear regression on top of a polynomial expansion of the input, and in which case, this regression sort of says that you're not allowed to use as many polynomial coefficients are maybe you should have. so you can imagine this is like, when you're doing polynomial regression, you can write out a polynomial, in that case your parameters, your Ws, would be these As, in which case, penalizing the W could force it towards lower degree polynomials. Except in the case of polynomial regression, you don't actually want to parameterize in terms of As, there's some other parameterization that you want to use, but that's the general idea, that you're sort of penalizing the parameters of the model to force it towards the simpler hypotheses within your hypothesis class.
+
+
+
+### Softmax Classifier (Multinomial Logistic Regression)
+
+for the multi-class SVM, we didn't actually give much interpretation to those scores. We just said that we want the true score, the score of the correct class to be greater than the incorrect classes, and beyond that we don't really say what those scores mean.
+
+ But now, for the multinomial logistic regression loss function, we actually will endow those scores with some additional meaning. and in particular we're going to use those scores to compute a probability distribution over our classes. so we use this so-called softmax function where we take all of our scores, we exponentiate them so that now they become positive, then we re-normalize them by the sum of those exponents. so now after we send our scores throught this softmax function, now we end up with this probability distribution, where now we have probabilities over our classes, where each probability is between zero and one, and the sum of probabilities across all classes sum to one. And now the interpretation is that we want, therer's this computed probability distribution that's implied by our scores, and we want to compare this with the target or true probability distribution.
+
+<img src="./img/softmax_classifier.png" />
+
+
+
+you can do this equation in many ways, you can do this as a KL divergence between the target and the computed probability distribution, you can do this as a maximum likelihood estimate, but at the end of the day, what we really want is that the probability of the true class is high and as close to one.
+
+so then our loss will now be the negative log of the probability of the true class. this is confusing 'cause we're putting this through multiple different things, but remember we wanted the probability to be close to one, so now log is a monotonic function, it turns out mathematically, it's easier to maximize log than it is to maximize the raw probability, so we stick with log. and now log is monotonic, so if we maximize log P of correct class, that means we want that to be high, but loss functions measure badness not goodness so we need to put in the minus one to make it go the right way.
+
+
+
+<img src="./img/softmax_classifier_summary.png" />
+
+<img src="./img/softmax_calculation_example.png" />
+
