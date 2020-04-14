@@ -371,3 +371,31 @@ W = np.random.randn(fan_in, fan_out) / np.sqrt(fan_in) # layer initialization
 - when using the ReLU, nonlinearity it breaks.
 - Because it's killing half of your units, it's setting approximately half of them to zero at each time, it's actually halving the variance that you get out of this.
 - the distributions starts collapsing. in this case you get more and more peaked toward zero, and more units deactivated.
+
+
+
+3. ReLU, He et al., 2015
+
+```python
+# ~~~~
+W = np.random.randn(fan_in, fan_out) / np.sqrt(fan_in) # layer initialization
+# ~~~~
+```
+
+the way to address this with something that has been pointed out in some papers, which is that you can try to account for this with an extra, diviede by two.
+
+<img src="./img/divide_by_two.png" style="zoom:50%;" />
+
+<img src="./img/divide_by_two_result_graph.png" style="zoom:67%;" />
+
+- half the neurons get killed.
+- so you're kind of equivalent input has actually half this number of input, and so you just add this divided by two factor in, this works much better and the distributions are pretty good throughout all layers of the network.
+
+
+
+<img src="./img/initialization_paper_list.png" />
+
+
+
+
+
