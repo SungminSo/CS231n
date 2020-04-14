@@ -1,4 +1,4 @@
-# Lecture 3 | Loss Functions and Optimization
+#  Lecture 3 | Loss Functions and Optimization
 
 
 
@@ -254,7 +254,7 @@ Q1: what happens when W=0 init is used?
 
 Q: because the gradient also depends on our loss, won't one backprop differently compared to the other?
 
-A: in the last layer, like yes, you do have basically some of this, the gradient will get different loss for each specific neuron based on which class it was connected to, but if you look at all the neurons generally throughout your network, you basically have a lot of these neurons that are connected in exactly the same way. they had the same updates and it's basically going to be the problem.
+A: in the last layer,  like yes, you do have basically some of this, the gradient will get different loss for each specific neuron based on which class it was connected to, but if you look at all the neurons generally throughout your network, you basically have a lot of these neurons that are connected in exactly the same way. they had the same updates and it's basically going to be the problem.
 
 
 
@@ -265,3 +265,109 @@ A: in the last layer, like yes, you do have basically some of this, the gradient
 <img src="./img/small_random_numbers.png" style="zoom:50%;" />
 
 - this does work okay for small networks, but problems with deeper networks.
+
+```python
+# assume some unit gaussian 10-D input data
+D = np.random.randn[1000, 500]
+hidden_layer_sizes = [500]*10
+nonlinearities = ['tanh']*len(hidden_layer_sizes)
+
+act = {'relu':lambda x:np.maximum(0,x), 'tanh':lambda x:np.tanh(x)}
+Hs = {}
+for i in range(len(hidden_layer_sizes)):
+  X = D if i == 0 else Hs[i-1] # input at this layer
+  fan_in = X.shape[1]
+  fan_out = hidden_layer_sizes[i]
+  W = np.random.randn(fan_in, fan_out) * 0.01 # layer initialization
+  
+  H = np.dot(X, W) #matrix multiply
+  H = act[nonlinearities[i]](H)
+  Hs[i] = H # cache result on this layer
+  
+# look at distributions at each layer
+print 'input layer had mean %f and std %f' % (np.mean(D), np.std(D))
+layer_means = [np.means(H) for i, H in Hs.iteritems()]
+layer_stds = [np.std(H) for i, H in Hs.iteritems()]
+for i, H in Hs.iteritems():
+  print 'hidden layer %d had mean %f and std %f' % (i+1, layer_means[i], layer_std[i])
+  
+# plot the means and standard deviations
+plt.figure()
+plt.subplot(121)
+plt.plot(Hs.keys(), layer_means, 'ob-')
+plt.title('layer mean')
+plt.subplot(122)
+plt.plot(Hs.keys(), layer_stds, 'or-')
+plt.title('layer std')
+
+# plot the raw distributions
+plt.figure()
+for i, H in Hs.iteritems():
+  plt.subplot(1, len(Hs), i+1)
+  plt.hist(H.ravel(), 30, range=(-1, 1))
+```
+
+<img src="./img/small_random_numbers_result.png" style="zoom:67%;" />
+
+- the means are always around zero.
+- the standard deviation shrinks and it quickly collapses to zero.
+- all activations become zero
+
+
+
+Q1: think about the backward pass. what do the gradients look like?
+
+A: we have our input values are very small at each layer, because they've all collapsed at this near zero, and then now each layer, we have our upstream graidnet flowing down, and then in order to get the gradient on the weights  dot product were doing W times X. it's just basically going to be X, which is our inputs. so because X is small, our weights are getting a very small gradient, and they're bascially not updating.
+
+
+
+upstream is the gradient flow from your loss, all the way back to your input. and so upstream is what came from what you've already done, flowing down into your current node.
+
+
+
+-> Second idea: **big random numbers**
+
+```python
+# ~~~~
+W = np.random.randn(fan_in, fan_out) * 1.0 # layer initialization
+# ~~~~~
+```
+
+smaple from this standard gaussian, now with standard deviation 1.0 instead of 0.01
+
+<img src="./img/big_random_numbers_result.png" style="zoom:67%;" />
+
+- because our weights are going to be big, we're going to always be at saturated regimes of either very negative or very positive of the tanh.
+- when they're saturated, that all the gradients will be zero, and our weights are not updating.
+
+
+
+**Xavier initialization**
+
+```python
+# ~~~~
+W = np.random.randn(fan_in, fan_out) / np.sqrt(fan_in) # layer initialization
+# ~~~~
+```
+
+1. Using tanh
+
+<img src="./img/xavier_tanh_result.png" style="zoom:50%;" />
+
+<img src="./img/xavier_tanh_result_graph.png" style="zoom:67%;" />
+
+- sample from our standard gaussian, and then we're going to scale by the number of inputs that we have.
+- the variance of the input to be the same as a variance of the output
+- intuitively with this kind of means is that if you have a small number of inputs, then we're going to divide by the smaller number and get larget weights, because with small inputs, and you're multiplying each of these by weight, you need a larger weights to get the same larger variance at output. and kind of vice versa for if we have many inputs, then we want smaller weights in order to get the same spread at the output.
+
+
+
+2. ReLU
+
+<img src="./img/xavier_ReLU_result.png" style="zoom:50%;" />
+
+<img src="./img/xavier_ReLU_result_graph.png" style="zoom:67%;" />
+
+- when using the ReLU, nonlinearity it breaks.
+- Because it's killing half of your units, it's setting approximately half of them to zero at each time, it's actually halving the variance that you get out of this.
+- the distributions starts collapsing. in this case you get more and more peaked toward zero, and more units deactivated.
