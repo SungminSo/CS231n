@@ -140,3 +140,128 @@ So in practice people also like to initialize ReLUs with slightly positive biase
 
 
 
+**PReLU**
+
+<img src="./img/PReLU.png" style="zoom: 50%;" />
+
+- the slope in the negative regime is determined through this alpha parameter, so we don't specify but we treat it as now a parameter
+- so this gives it a little bit more flexibility
+
+
+
+**ELU**
+
+<img src="./img/ELU_graph.png" style="zoom:67%;" />
+
+<img src="./img/ELU.png" style="zoom:50%;" />
+
+- Has all benefits of ReLU
+- closer to zero mean outputs
+- negative saturation regime compared with Leaky ReLU adds some robustness to noise
+
+
+
+problem
+
+- computation requires exp()
+
+
+
+Q: whether this parameter alpha is going to be specific for each neuron
+
+A: I believe it is often specified but i actually can't remember exactly.
+
+
+
+**Maxout**
+
+<img src="./img/maxout.png" style="zoom:50%;" />
+
+- does not have the basic form of dot product -> nonlinearity
+- generalizes ReLU and Leaky ReLU. because just taking the max over theses two linear functions.
+- operating in a linear Regime
+- doesn't saturate and it doesn't die
+
+
+
+problem
+
+- doubles the number of parameters/neuron
+
+
+
+### Data processing
+
+**Step 1 : Preprocessing the data**
+
+<img src="./img/preprocessing.png" style="zoom:67%;" />
+
+- zero-centered: consider what happens when the input to a neuron is always positive
+  - gradients on W is always all positive or all negative
+- normalizing: all features are in the same range, and so that they contribute equally.
+
+
+
+<img src="./img/PCA_Whitening.png" style="zoom:67%;" />
+
+- in practice, you may also see PCA and Whitening of the data
+- we typically just stick with the zero mean, and we don't do the normalization
+
+
+
+one reason for this is generally with images we don't really want to take all of our input, let's say pixel values and project this onto a lower dimensional space of new kinds of features that we're dealing with. we typically just want to apply convolutional networks spatially and have our spatial structure over the original image.
+
+
+
+Q: we do this pre-processing in a training phase, do we also do the same kind of thing in the test phase?
+
+A: yes. in general on the training phase is where we determine our mean, and then we apply this exact same mean to the test data. so, we'll normalize by the same empirical mean from the training data.
+
+
+
+Q: what's a channel in this case, when we are subtracting a per-channel mean?
+
+A: this is RGB. our images are typically for example, 32 by 32 by 3. So width, height, each are 32, and our depth we have 3 channels RGB.
+
+
+
+Q: when we're subtracting the mean image, what is the mean taken over?
+
+A: the mean is taking over all of your training images. So you'll take all of your training images and just compute the mean of all of those.
+
+
+
+Q: we do this for the entire training set, once before we start training, we don't do this per batch?
+
+A: that's exactly correct. we just want to have a good sample, an empirical mean that we have. so if you take it per batch, if you're sampling reasonable batches, it should be basically getting the same values anyways for the mean, and so it's more efficient and easier just do this once at the beginning. you might not even have to really take it over the entire training data. you could also just sample enough training images to get a good estimate of your mean.
+
+
+
+Q: does the data preprocessing solve the sigmoid problem?
+
+A: the data preprocessing is doing zero mean. and we talked about how sigmoid, we want to have zero mean. so it does solver this for the first layer that we pass it through. but in deep network, this is not going to be sufficient.
+
+
+
+### Weight Initialization
+
+Q1: what happens when W=0 init is used?
+
+- problem is all the neurons will do the same thing.
+  - since your weights are zero, given an input, every neuron is going to have the same operation basically on top of your inputs. and so, since they're all going to output the same thing, they're also all going to get the same gradient. and they're all going to update in the same way. and now you're just going to get all neurons that are exactly the same, which is not you want.
+
+
+
+Q: because the gradient also depends on our loss, won't one backprop differently compared to the other?
+
+A: in the last layer, like yes, you do have basically some of this, the gradient will get different loss for each specific neuron based on which class it was connected to, but if you look at all the neurons generally throughout your network, you basically have a lot of these neurons that are connected in exactly the same way. they had the same updates and it's basically going to be the problem.
+
+
+
+-> First idea: **Small random numbers**
+
+(Gaussian with zero mean and 1e-2 standard deviation)
+
+<img src="./img/small_random_numbers.png" style="zoom:50%;" />
+
+- this does work okay for small networks, but problems with deeper networks.
