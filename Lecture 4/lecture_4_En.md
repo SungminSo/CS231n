@@ -84,7 +84,7 @@ Q: This is a question on the graph itself, is there a reason that the first two 
 
 A: they could also be connected into a single addition node, you can do that if you want. in this case i just wrote this out into as simple as possible, where each node only had up to two inputs.
 
-
+n
 
 ### Patterns in backward flow
 
