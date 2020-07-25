@@ -112,3 +112,105 @@ A: each of these grid, each part of this grid is a one neuron. and so what we've
 ### In practice: Common to zero pad the border
 
 - pad our input image with zeros, and so now you're going to be able to place a filter centered at the upper right-hand pixel location of your actual input image. 
+
+
+
+Q1: if i have 7x7 image, 3x3 filter, stride 1, but now i pad with a one pixel border, what's the size of my output going to be?
+
+A: 7
+
+
+
+Q: how does this connect to before when we had a 32 by 32 b three input?
+
+A: our input had depth and here in this example showing a 2D example with no depth. but in practice you're going to multiply throughout the entire depth as we had before. so 3x3x3 in this case
+
+
+
+Q: does the zero padding add some sort of extraneous features at the coreners?
+
+A: there is a little bit of kind of artifacts at the edge and we do our best to deal with it. and in practice this works reasonably. there's also other ways to do this, mirror the values here or extend them, and so it doesn't have to be zero padding.
+
+
+
+Q: if we have non-square images, do we ever use a stride that's different horizontally and vertically?
+
+A: there is nothing stopping you from doing that, you could, but in practice we just usally take the same stride, we usually operate square regions.
+
+
+
+Q: why do we do zero padding?
+
+A: the way we do zero padding is to maintain the same input size as we had before. if we don't do this kind of zero padding, or any kind of padding, we're going to really quickly shrink the size of the outputs that we have.
+
+
+
+### Examples time
+
+input volume: 32x32x3
+
+- 10 5x5 filters with stride 1, pad 2
+- Q1: what is the output volume size? => 32x32x10
+- Q2: what's the number of parameters in this layer? => 760 : (5x5x3 + 1) x 10
+
+
+
+### Summary
+
+<img src="./img/conv_summary.png" />
+
+
+
+Q: what's the intuition behind how you choose your stride?
+
+A: at one sense it's kind of the resolution at which you slide it on, and usually the reason behind this is because when we have a larger stride what we end up getting as the output is a down sampled image. basically thinking about trade offs of the number of parameters you have, the size of your model, overfitting, things like that.
+
+
+
+### Pooling Layer
+
+-  make the representations smaller and more manageable(== downsamples)
+- doesn't do anything in the depth, only pooling spatially.
+
+
+
+### Max Pooling
+
+<img src="./img/max_pooling.png" />
+
+
+
+Q: is it typical to set up the stride so that there isn't an overlap?
+
+A: yes, for the pooling layers it is.
+
+
+
+Q: why is max pooling better than just taking the doing something like average pooling?
+
+A: average pooling is also something that you can do, and intuition behind why max pooling is commonly used is that it can have this interpretation of activations of my neurons, so each value is kind of how much this neuron fired in this location, so you can think of max pooling as giving a signal of how much did this filter fire at any location in this image.
+
+
+
+Q: since pooling and stride both have the same effect of downsampling, can you just use stride instead of pooling and so on?
+
+A: yes. and so in practice i think looking at more recent neural network architectures people have begun to use stride more in order to do the downsampling instead of just pooling.
+
+
+
+
+
+### Fully Connected Layer
+
+<img src="./img/convNet_example.png" />
+
+- contains neurons that connect to the entire input volume, as in ordinary Neural Networks
+
+
+
+Q: when do you know you've done enough pooling to do the classification?
+
+A: just try and see. in practice these are all design choices and you can think about this a little bit intuitively.
+
+
+
