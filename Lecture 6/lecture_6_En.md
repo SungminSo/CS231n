@@ -1,4 +1,4 @@
-#  Lecture 3 | Loss Functions and Optimization
+#  Lecture 6 | Training Neural Networks I
 
 
 
@@ -86,14 +86,14 @@ Loop:
 
 - Does not saturate in positive region
 - Very computationally efficient
-- converges much faster than sigmoid/tanh in practivce
-- actually more biologically plausible thant sigmoid
+- converges much faster than sigmoid/tanh in practice
+- actually more biologically plausible than sigmoid
 
 
 
 2 problems:
 
-1. not zero-cetnered output
+1. not zero-centered output
 2. in the positive half of the inputs, we don't have saturation, but this is not the case of the negative half.
    - <img src="./img/ReLU_problem_1.png" style="zoom:67%;" />
    - what happens when x = -10? => gradient is 0
@@ -107,7 +107,7 @@ Dead ReLU
 - you can look at this in, as coming from several potential reasons.
   1. When you have bad initialization. then they're never going to get a data input that causes it to activate, and so they're never going to get good gradient flow coming back.
   2. when your learning rate is too high. and so this case you started off with an okay ReLU, but because you're making these huge updates, the weights jump around and then your ReLU unit in a sense, gets knocked off of the data manifold.
-- so if in practice,if you freeze a network that you've trained and you pass the data through, you can see it actually is much as 10 to 20% of the network is these dead ReLUs.
+- so in practice,if you freeze a network that you've trained and you pass the data through, you can see it actually is much as 10 to 20% of the network is these dead ReLUs.
 
 
 
@@ -119,7 +119,7 @@ A: it's whatever the weights happended to be, and where the data happens to be i
 
 Q: for the sigmoid we talked about two drawbacks, and one of them was that the neurons can get saturated, but it is not the case, when all of your inputs are positive?
 
-A: so when all of your inputs are positive, they're all going to be coming in this zero plus region here, and so you can still get a saturating neuron, because you see up in this positive region, it also plateaus at one, and so when it's when you have large positive values as input your're also going to get the zero gradient, 
+A: when all of your inputs are positive, they're all going to be coming in this zero plus region here, and so you can still get a saturating neuron, because you see up in this positive region, it also plateaus at one, and so when you have large positive values as input your're also going to get the zero gradient, 
 
 
 
@@ -239,7 +239,7 @@ A: that's exactly correct. we just want to have a good sample, an empirical mean
 
 Q: does the data preprocessing solve the sigmoid problem?
 
-A: the data preprocessing is doing zero mean. and we talked about how sigmoid, we want to have zero mean. so it does solver this for the first layer that we pass it through. but in deep network, this is not going to be sufficient.
+A: the data preprocessing is doing zero mean. and we talked about how sigmoid, we want to have zero mean. so it does solve this for the first layer that we pass it through. but in deep network, this is not going to be sufficient.
 
 
 
@@ -378,7 +378,7 @@ W = np.random.randn(fan_in, fan_out) / np.sqrt(fan_in) # layer initialization
 
 ```python
 # ~~~~
-W = np.random.randn(fan_in, fan_out) / np.sqrt(fan_in) # layer initialization
+W = np.random.randn(fan_in, fan_out) / np.sqrt(fan_in/2) # layer initialization
 # ~~~~
 ```
 
@@ -397,5 +397,81 @@ the way to address this with something that has been pointed out in some papers,
 
 
 
+### Batch Normalization
+
+- wanting to keep activations in a gaussian range that we want.
+
+<img src="./img/batch_normalization.png"/>
+
+- instead of with wegith initialization, we're setting this at the start of training so that we try and get it into a good spot that we can have unit gaussians at every layer
 
 
+
+1. compute the empirical mean and variance independently for each dimension, so each basically feature element.
+2. normalize
+
+
+
+batch normalization is usually inserted after Fully Connected or Convolutional layers, and before nonlinearity
+
+we were multiplying by W in theses layers, which we do over and over again, then we can have this bad scaling effect with each one. and so this basically is able to undo this effect.
+
+with convolutional layers, we want to normalize not just across all the training examples, and independently for each feature dimension, but we actually want to normalize jointly across both all the feature dimensions, all the spatial locations, that we have in our activation map as well as of the training examples.
+
+
+
+Problem: do we necessarily want a unit gaussianinput to a tanh(nonlinearities)?
+
+- because what this is doing is this is constraining you to the linear regime of this nonlinearity.
+- but maybe a little bit of this is good, because you want to be able to control what's how much saturation that you want to have.
+
+ 
+
+<img src="./img/batch_normalization_squash.png" />
+
+<img src="./img/batch_normalization_gamma_beta.png" />
+
+
+
+summary
+
+- improves gradient flow through the network
+- allows higher learning rates
+- reduces the strong dependence on initialization
+- acts as a form of regularization in a funny way, and slightly reduces the need for drop out
+
+
+
+Q: is gamma and beta are learned parameters?
+
+A: yes
+
+
+
+Q: why do we want to learn this gamma and beta to be able to learn the identity function back?
+
+A: because you want to give it the flexibility.what batch normalization is doing is forcing our data to become this unit gaussian, but even though in general this is a good idea, it's not always that this is exactly the best thing to do. we saw in particular for something like a tanh, you might want to control some degree of saturation that you have. so what this does is it gives you the flexivility of doing this esact like unit gaussian normalization if it wants to, but also learning that maybe in this particular part of the network slightly scaled or shifted.
+
+
+
+Q: for things like reinforcement learning, you might have a really small bach size. how do you deal with this?
+
+A: in practice, batch normalization has been used a lot for like for standard convolutional neural networks, and there's actually papers on how do we want to do normalization for different kinds of recurrent networks. and so there's different considerations that you might want to think of there.
+
+
+
+Q: if we force the inputs to be gaussian, do we lose the structure?
+
+A: no, in a sense that you can think of if you had all your features distributed as a gaussian for example, even if you were just doing data pre-processing, this gaussian is not losing you any structure. 
+
+
+
+Q: are we normalizing the weight so that they become gaussian?
+
+A: we're normalizing the inputs to each layer, so we're not changing the weights in this process. 
+
+
+
+Q: once we subtract by the mean and divide by the standard deviation, does this become gaussian?
+
+A: yes.
