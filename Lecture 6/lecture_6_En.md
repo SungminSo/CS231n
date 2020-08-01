@@ -462,7 +462,7 @@ A: in practice, batch normalization has been used a lot for like for standard co
 
 Q: if we force the inputs to be gaussian, do we lose the structure?
 
-A: no, in a sense that you can think of if you had all your features distributed as a gaussian for example, even if you were just doing data pre-processing, this gaussian is not losing you any structure. 
+A: no, in a sense that you can think of if you had all your features distributed as a gaussian for example, even if you were just doing data pre-processing, this gaussian is not losing you any structure. it's just shifting and scaling your data into a regime.
 
 
 
@@ -474,4 +474,70 @@ A: we're normalizing the inputs to each layer, so we're not changing the weights
 
 Q: once we subtract by the mean and divide by the standard deviation, does this become gaussian?
 
-A: yes.
+A: yes. 
+
+
+
+Q: if we're going to be doing the shift and scale, and learning these is the batch normalization redundant, because you could recover the identity mapping?
+
+A: the network learns that identity mapping is alwyas the best, and it learns these parameters, there would be no point for batch normalization, but in practice this doesn't happen. so in practice, we will learn this gamma and beta.that's not the same as a identity mapping. it will shift and scale by some amount, but not the amount that's going to give you an identity mapping. 
+
+
+
+we don't re-compute mean and std at test time. instead fixed empirical mean of activations during training is used.
+
+
+
+### Babysitting the Learning Process
+
+- how do we monitor training
+- how do we adjust hypterparameters as we go to get a good result
+
+1. Preprocess the data
+2. Choose the architecture
+3. Start with small regularization and find learning rate that makes the loss go down
+
+
+
+Q1: even though our loss with barely changing, the training and the validation accuracy jumped up to 20% verfy quickly. why this might be the case?
+
+​	-> the probabilities are still pretty diffuse, so our loss term is still pretty similar. but when we shift all of thses probabilities slightly in the right direction, the accuracy all of a sudden can jump, because we're taking the maximum correct value.
+
+
+
+Q2: when you learning with quite big learning rate, you have NaNs. what's the meaning of NaNs in this case?
+
+​	-> NaN almost alwyas means high learning rate, and your cost exploded.
+
+
+
+### Hyperparameter Optimization
+
+- the strategy that we're going to use is for any hyperparameter for example learning rate, is to do cross-validation.
+
+
+
+Cross-valication
+
+- train on your training set, and then evaluating on a validation set.
+
+
+
+if you want to make sure that your hyperparameter's range kind of has the good values somewhere in the middle, or somewhere you get a sense that you've hit, you've explored your range fully.
+
+
+
+Random Search vs Grid Search
+
+- we can sample for a fixed set of combinations, a fixed set of values for each hyperparameter.
+- but in pracitce it's actually better to sample from a random layout
+- <img src="./img/sample_search.png" />
+
+
+
+Monitor loss curve
+
+<img src="./img/monitor_loss_curves.png" />
+
+<img src="./img/result_of_bad_initialization.png" />
+
