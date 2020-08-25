@@ -142,3 +142,110 @@ v = rho * v - learning_rate * dx
 x += -rho * old_v + (1 + rho) * v
 ```
 
+
+
+### AdaGrad
+
+```python
+grad_squared = 0
+while True:
+    dx = compute_gradient(x)
+    grad_squared += dx * dx
+    x -= learning_rate * dx / (np.sqrt(grad_squared) + 1e-7)
+```
+
+- during the course of the optimization, you're going to keep a running estimate or a running sum of all the squared gradients that you see during training.
+- Q1: what does this kind of scaling do in this situation where we have a very high condition number?
+  - if we have two coordinates, one that always has a very high gradient and one that always has a very small gradient, then as we add the sum of the squares of the small gradient, we're going to be dividing by a small number, so we'll accelerate movement along the one dimension.
+  - then along the other dimension, where the gradients tend to be very large, then we'll be dividing  by a large number, so we'll kind of slow down our progress along the wiggling dimension.
+- Q2:  what happens with AdaGrad over the course of training
+  - the steps actually get smaller and smaller because we just continue updating this estimate of the squared gradients over time, so this estimate just grows monotonically over the course of training.
+  - in the non-convex case, that's a little bit problematic, because as you come towards a saddle point, you might get stuck with AdaGrad, and then you kind of no longer make any progress.
+
+
+
+### RMSProp
+
+```python
+grad_squared = 0
+while True:
+    dx = compute_gradient(x)
+    grad_squared += decay_rate * grad_squared + (1 - decay_rate) * dx * dx
+    x -= learning_rate * dx / (np.sqrt(grad_squared) + 1e-7)
+```
+
+
+
+### Adam
+
+```python
+# almost (not full form)
+first_moment = 0
+second_moment = 0
+while True:
+    dx = compute_gradient(x)
+    first_moment = beta1 * first_moment + (1 - beta1) * dx
+    second_moment = beta2 * second_moment + (1 - beta2) * dx * dx
+    x -= learning_rate * first_moment / (np.sqrt(second_moment) + 1e-7)
+```
+
+- first_moment -> role of momentum
+- second_moment -> role of AdaGrad/RMSProp
+- Q1: what happens at the first time step?
+  - we've initialized our second moment with zero. after one update of the second moment, second moment still very close to zero. so then when we're making our update step here and we divide by our second moment now we're dividing by a very small number. so we're making a very large step at the beginning.
+
+
+
+Q: the first moment at the first time step is also very small, then you're multiplying by small and you're dividing by square root of small squared, so what's going to happen? they might cancel each other out.
+
+A: that's true. sometimes these cancel each other out and ou're okay. but sometimes this ends up in taking very large steps right at the beginning.
+
+
+
+Q: what is this 10 to the minus seven term in the last equation?
+
+A: the idea is that we're dividing by something. we want to make sure we're not dividing by zero, so we always add a small positive constant to the denominator, just to make sure we're not dividing by zero. 
+
+
+
+```python
+# full form
+first_moment = 0
+second_moment = 0
+while True:
+    dx = compute_gradient(x)
+    # Momentum
+    first_moment = beta1 * first_moment + (1 - beta1) * dx
+    # AdaGrad/RMSProp
+    second_moment = beta2 * second_moment + (1 - beta2) * dx * dx
+    # Bias Correction
+    first_unbias = first_moment / (1 - beta1 **t)
+    second_unbias = second_moment / (1 - beta2 ** t)
+    x -= learning_rate * first_unbias / (np.sqrt(second_unbias) + 1e-7)
+```
+
+- update our first and second moments, we create an unbiased estimate of those first and second moments by incorporating the current time step, t.
+
+
+
+Q: what does Adam not fix?
+
+A: they still take a long time to train. 
+
+
+
+### Learning Rate
+
+<img src="./img/learning_rate.png" />
+
+- Q1: Which one of these learning rates is best to use?
+  - we don't actually have to stick with one learning rate throughout the course of training.
+  - => learning rate decay over time!
+    - step decay
+    - exponential decay
+    - 1/t decay 
+  - learning rate decay is a little bit more common with SGD momentum, and a little bit less common with Adam.
+  - learning rate dacy is kind of a second-order hyperparameter. you typically should not optimize over this thing from the start. try with no decay, see what happens. then kind of eyeball the loss curve and see where you think you might need decay.
+
+
+
