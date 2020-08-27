@@ -249,3 +249,145 @@ A: they still take a long time to train.
 
 
 
+we don't really care about training error that much.
+
+instead, we really care about our performance on unseen data.
+
+
+
+### Model Ensembles
+
+1. Train multiple independent models
+2. At test time average their results
+
+
+
+Q: it's bad when there's a large gap between error that means you're overfitting, but if therer's no gap, then is that also matbe bad? Do we actually want some small, optimal gap between the two?
+
+A: we don't really care about the gap. what we really care about is maximizing the performance on the validation set. so what tends to happen is that if you don't see a gap, then you could have improved your absolute performance, in many cases, by overfitting a little bit more. 
+
+
+
+Q: are hyperparameters the same for the ensemble?
+
+A: somethimes they're not. you might want to try different sizes of the model, different learning rates, different regularization strategies and ensemble across these different things.
+
+
+
+Tips and Tricks
+
+- instead of using actual parameter vector, keep a moving average of the parameter vector and use that at test time (Polyak averaging)
+
+- ```python
+  while True:
+      data_batch = dataset.sample_data_batch()
+      loss = network.forward(data_batch)
+      dx = network.backward()
+      x += - learning_rate * dx
+      x_test = 0.995*x_test + 0.005*x
+  ```
+
+
+
+### Regularization
+
+- where we add something to our model to prevent it from fitting the training data to well in the attempts to make it perform better on unseen data.
+
+
+
+in common use:
+
+	- L2 regularization
+	- L1 regularization
+	- Elastic net(L1 + L2)
+
+
+
+Dropout
+
+- in each forward pass, randomly set some neurons to zero
+- probability of dropping is a hyperparameter
+- 0.5 is common
+
+
+
+Q: what are we setting to zero?
+
+A: it's the activations.
+
+
+
+Q: which layers do you do this on?
+
+A: it's more common in fully connected layers, but you sometimes see this in convolutional layers, as well. 
+
+
+
+```python
+p = 0.5 # probability of keeping a unit active.
+
+def train_step(X):
+    """ X contains the data """
+    
+    # forward pass for example 3-layer neural network
+    H1 = np.maximum(0, np.dot(W1, X) + b1)
+    U1 = np.random.rand(*H1.shape) < p #first dropout mask
+    H1 *= U1 # drop!
+    H2 = np.maximum(0, np.dot(W2, H1) + b2)
+    U2 = np.random.rand(*H2.shape) < p # second dropout mask
+    H2 *= U2 # drop!
+    out = np.dot(W3, H2) + b3
+    
+    
+def predic(X):
+    # ensembled forward pass
+    H1 = np.maximum(0, np.dot(W1, X) + b1) * p # NOTE: scale the activations
+    H2 = np.maximum(0, np.dot(W2, H1) + b2) * p # NOTE: scale the activations
+    out = np.dot(W3, H2) + b3
+```
+
+
+
+Q: what happens to the gradient during training with dropout?
+
+A: we only end up propagating the gradients throught the nodes that were not dropped. this has the consequence that when you're training with dropout, typically training takes longer because at each step, you're only updating some subparts of the network. 
+
+
+
+### Data Augmentation
+
+- transform the image in some way during training such that the label is preserved.
+- horizontal flips
+- color jitter
+- etc
+
+
+
+### DropConnect
+
+- related idea to dropout, but rather than zeroing out the activations at  every forward pass, instead we randomly zero out some of the values of the weight matrix instead.
+
+
+
+### Fractional Max Pooling
+
+- every time we have our pooling layer, we're going to randomize exactly the pool that the regions over which we pool.
+
+
+
+Q: do you usually use more than one regularization method?
+
+A: in many cases, batch normalization alone tends to be enough, but then sometimes if batch normalization alone is not enough, then you can consider adding dropout or other thing once you see your network overfitting.
+
+
+
+### Transfoe Learning 
+
+- one problem with overfitting is sometimes you overfit 'cause you don't have enough data.
+- transfer learning kind of busts this myth that you don't need a huge amount of data in order to train a CNN.
+- <img src="./img/transfer_learning.png" />
+
+
+
+
+
