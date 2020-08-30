@@ -98,7 +98,50 @@ A: this is a very different kind of approach in architecture. this was the first
   - and then at the second layer, each of these neurons in the second layer is going to look at 3x3 other first layer filters, but the corners of these 3x3 have an additional pixel on each side, that is looking at in the original input layer. so the second layer is actually looking at 5x5 receptive field.
   - and then if you do this again, the third layer is looking at 7x7 in the input layer.
   - so the effective receptive field here is going to be 7x7. which is the same as one 7x7 conv layer.
+  - but deeper, more non-linearities, and few parameters
+- <img src="./img/VGGNet_structure.png" />
+  - total memory: 24M * bytes ~= 96MB / image
+  - total params: 138M parameters
 
 
+
+Q: what do we mean by deeper, is it the number of filters, number of layers?
+
+A: deeper in this case is always referring to layers. there are two usages of the word depth which is confusing, one is the depth rate per channel, width by height by depth, but in general we talk about the depth of a network, this is going to be the total number of layers in the network.
+
+
+
+Q: within each layer what do different filters need?
+
+A: each filter is a set of weight looking at 3x3 value input depth, and this produces one feature map of all the responses of the different spatial locations. 
+
+
+
+Q: is there intuition behind as you go deeper into the network we have more channel depth?
+
+A: you can have any design that you want so you don't have to do this. in practice you will see this happen a lot of the times.
+
+
+
+Q: performance-wise is there any reason to use SVM instead of softmax
+
+A: no. a classifier you can use either one, but in general softmax losses have generally worked well and been standard use for classification.
+
+
+
+Q: we don't have to store all of the memory like we can throw away the parts that we don't need and so on?
+
+A: yes. some of this you don't need to keep, but you're also going to be doing a backwards pass. and when you were doing the chain rule you needed a lot of these activations as part of it and so in large part a lot of this does need to be kept.
+
+
+
+### GoogleNet
+
+- 22 layers
+- deeper networks, with computational efficiency
+- no FC layers
+- only 5 million parameters
+- inception module
+  - stack a lot of local typologies one on top of each other.
 
  
