@@ -143,5 +143,160 @@ A: yes. some of this you don't need to keep, but you're also going to be doing a
 - only 5 million parameters
 - inception module
   - stack a lot of local typologies one on top of each other.
+  - <img src="./img/GoogleNet_inception_module.png" />
+  - multiple receptive field sizes for convolution (1x1, 3x3, 5x5)
+  - pooling operation (3x3)
+  - Q1: what is the problem with this?
+    - computational complexity is going to be a problem in here
+    - very expensive computation
+  - Q2: what is the output size of the 1x1 conv. with 128 filters?
+    - module input: 28x28x256
+    - 28x28x128
+  - Q3: what are the output sizes of all different filter operations?
+    - after 3x3 conv, 192: 28x28x192
+    - after 5xx5 conv, 96: 28x28x96
+    - after 3x3 pool: 28x28x256
+    - after filter concatenation: 28x28x(128+192+96+256) = 28x28x672
+  - pooling layer also preserves feature depth, which means total depth after concatenation can only grow at ever layer.
+  - solution: use bottlenack layers and project these feature maps to lower dimension before our convolutional operations
+  - <img src="./img/inception_module_with_bottleneck.png" />
+
+
+
+Q: how are we getting 28x28 for everything?
+
+A: here we're doing all the zero padding in order to maintain the spatial dimensions, and that way we can do this filter concatenation depth-wise.
+
+
+
+Q: what's the 256 deep at the input?
+
+A: this is not the input to the network, this is the input just to this local module that i'm looking at. in this case 256 is the depth of the previous inception module that came just before this.
+
+
+
+Q: how did we get 28x28x128 for the fisrt conv?
+
+A: we're going to take this 1x1 convolution slide it across our 28x28x256 input spatially where it's at each location, it's going to dot product throught the entire 256 depth, and so we do this 1x1 conv slide it over spatially and we get a feature map out that's 28x28x1. each filter produces one of these 28x28x1 maps, and we have here a total 128 filters.
+
+
+
+Q: have you looked into what information might be lost by doing this 1x1 conv at the beginning?
+
+A: there might be some information loss, but at the same time if you're doint these projections you're taking a linear combination of these input feature maps which has redundancy in them, you're taking combinations of them, and you're also introducing an additional non-linearity after the 1x1 conv, so it also actually helps in that way with adding a little bit more depth.
+
+
+
+Q: are the auxiliary outputs actually useful for the final classification to use these as well?
+
+A: i think when they're training them the do average all these for the losses coming out. i think they are helpful. it seems very possible that they would use all of them,but you'll need to check on that.
+
+
+
+Q: for the bottleneck layers, is it possible to use some other types of dimensionality reduction?
+
+A: yes. you can use other kinds of dimensionality reduction. the benefits here of this 1x1 conv is you're getting this effect, but it's all conv layer just like any other.
+
+
+
+Q: are any weights shared or they all separate?
+
+A: all of these layers have separate weights.
+
+
+
+Q: why do we have to inject gradients at earlier layers?
+
+A: our classification output at the very end, where we get a gradient on this, it's passed all the way back throught the chain rule but the problem is when you have very deep networks and you're going all the way back throught these, some of this gradient signal can become minimized and lost closer to the beginning, and so that's why having these additional ones in earlier parts can help provide some additional signal.
+
+
+
+Q: are you doing back prop all the times for each output?
+
+A: no. it's just one back prop all the way through, you can think of there being kind of like an addition at the end of these if you were to draw up your computational graph, and so you get your final signal and you can just take all of these gradients and just back plot them all the way through.
+
+
+
+### ResNet
+
+- very deep networks using residual connections
+- 152 layer model for ImageNet
+- Q1: what happens when we continue stacking deeper layers on a "plain" convolutional neural network?
+  - not work better
+  - <img src="./img/deeper_not_work_better.png" />
+  - 56-layer model performs worse on both training and test error
+  - the deeper model performs worse, but it's not caused by overfitting.
+  - Hypothesis: the problem is an optimization problem, deeper models are harder to optimize.
+  - Solution: use network layers to fit a residual mapping instead of directly trying to fit a desired underlying mapping.
+  - <img src="./img/residual_block.png" style="zoom:60%"/>
+  - at the end of this block we take the step connection on loop, where we just take our input, we just use pass it through as an identity, and so if we had no weight layers in between it was just going to be the identity. it would be the same thing as the output, but now we use our additional weight layers to learn some delta, for some residual from our X.
+- every residual block hass two 3x3 conv layers.
+- no FC layers at the end.
+
+
+
+Q: is there the same dimension?
+
+A: yes. these two paths are the same dimension. in general eighter it's the same dimension, or what they actually do is they have these projections and shortcuts and they have different ways of padding to make things work out to be the same dimension.
+
+
+
+Q: what exactly do we mean by residual? this output of the transformation is a residual?
+
+A: where F(X) is the output of oour transformation and then X is our input, just passed through by the identity. we'd like to using a plain layer, what we're trying to do is learn something like H(X), but what we saw earlier is that it's hard to learn H(X). it's a good H(X) as we get very deep networks. and so here the idea is let's try and break it down instead of as H(X) is equal to F(X) + X, and let's just try and lear F(X). so you can think of it as kind of modifying this input, in place in a sense.
+
+
+
+Q: when we're saying the word residual are we talking about F(X)?
+
+A: yes.
+
+
+
+Q: in practice do we just sum F(X) and X together, or do we learn some weighted combination?
+
+A: you just do a direct sum. because when you do a direct sum, this is the idea of let me just learn what is it i have to add or subtract onto X.
+
+
+
+Q: have peopel tried other ways of combining the inputs from previous layers?
+
+A: yes.this is basically a very active area of research on.
 
  
+
+<img src="./img/bottleneck_of_ResNet.png" />
+
+- for deeper networks, use "bottleneck" layer to improve efficiency
+
+
+
+<img src="./img/accuracy_and_memory_usage.png" />
+
+- the size of the circle is memory usage
+
+
+
+<img src="./img/deep_residual_network.png" />
+
+- identity mappings in depp residual networks
+- He et el. 2016
+- Gives better performance
+
+
+
+<img src="./img/wide_residual_network.png" />
+
+- wide residual networks
+- Zagoruyko et el. 2016
+- increasing width instead of depth more computationally efficient
+
+
+
+FractalNet : ultra-deep neural networks without residuals
+
+- Larsson et el. 2017
+- argues that key is transitioning effectively from shallow to deep and residual representations are not necessary
+- Fractal architecture with both shallow and deep paths to output
+- trained with dropping out sub-paths
+- full network at test time
